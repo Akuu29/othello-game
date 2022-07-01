@@ -1,6 +1,6 @@
 import { FC, useState, MouseEventHandler, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BoardMap, startGame } from './api/gameApi';
+import { BoardMap, GameApi } from './api/gameApi';
 import './index.css';
 
 const Square: FC<{
@@ -23,7 +23,7 @@ const Board: FC = () => {
     // 初期版面の設定
     useEffect(() => {
         const setInitialBoard = async () => {
-            let initializeBoard = await startGame();
+            let initializeBoard = await GameApi.startGame();
             setSquares(initializeBoard);
         };
 
