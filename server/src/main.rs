@@ -5,6 +5,7 @@ use dotenv::dotenv;
 
 use crate::scopes::game_scope;
 mod scopes;
+pub mod game;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
