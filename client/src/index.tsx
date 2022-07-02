@@ -30,14 +30,13 @@ const Board: FC = () => {
         setInitialBoard();
     }, [])
 
-    const handleClick = (h: number, w: number) => {
-        const player = blackIsNext ? '●' : '○';
-        // setSquares((prevSquares) => {
-        //     let currentSquares = [...prevSquares];
-        //     currentSquares[row][line] = player;
-        //     return currentSquares;
-        // });
-        setblackIsNext(!blackIsNext);
+    const handleClick = async (h: number, w: number) => {
+        const player = blackIsNext ? 1 : 2;
+        let boardSettedStone = await GameApi.setStoneInBoard([h, w], squares!, player);
+        if(boardSettedStone) {
+            setSquares(boardSettedStone);
+            setblackIsNext(!blackIsNext);
+        }
     };
 
     const renderSquare = (line: Array<number>, h: number) => {
