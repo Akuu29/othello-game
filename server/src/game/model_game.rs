@@ -97,6 +97,39 @@ impl GameInfo {
 
         board
     }
+    // 次のプレイヤーが石の配置可能か
+    pub fn next_player_is_reversible(&self, next_board: &[[u32; 8]; 8]) -> bool {
+        let next_player = if self.player == 1 {2} else {1};
+
+        
+        // next_boardの中で石が配置されていない座標の取得
+        let mut positions_nothing_place = vec![];
+        for (h, line) in next_board.iter().enumerate() {
+            for(w, point) in line.iter().enumerate() {
+                if point == &0 {
+                    positions_nothing_place.push([h as i32, w as i32]);
+                }
+            }
+        }
+
+        let mut next_player_is_reversible = false;
+        for position in positions_nothing_place {
+            let game_info = GameInfo {
+                stone_position: position,
+                board: *next_board,
+                player: next_player,
+            };
+
+            let revesible_positions = game_info.return_reversible_positions();
+            if !revesible_positions.is_empty() {
+                next_player_is_reversible = true;
+                break;
+            }
+        }
+
+        next_player_is_reversible
+    }
+
 
     // pub fn tip() {
 

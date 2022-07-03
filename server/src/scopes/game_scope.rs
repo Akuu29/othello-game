@@ -44,5 +44,12 @@ async fn set_stone_in_board(game_info: Json<GameInfo>) -> impl Responder {
     // 反転後のボード
     let board = game_info.set_stone_in_board(reversible_positions);
 
-    HttpResponse::Ok().json(json!({"board": board}))
+    // 次のプレイヤーが石を配置可能か
+    // 配置不可能な場合、status'skipToNextPlayer'をレスポンスのjsonに追加し返却
+    let next_player_is_reversible = game_info.next_player_is_reversible(&board);
+    if !next_player_is_reversible {
+        return HttpResponse::Ok().json(json!({"board": board, "status": "skipToNextPlayer"}));
+    }
+
+    HttpResponse::Ok().json(json!({"board": board, "status": "success"}))
 }
