@@ -134,8 +134,22 @@ impl GameInfo {
     // pub fn tip() {
 
     // }
+    // ボードの版面の状況を調べる。
+    // true: ゲーム続行 false: ゲーム終了
+    pub fn calculate_board_status(board: &[[u32; 8]; 8]) -> bool {
+        let mut game_is_continue = false;
+        'board: for squares in board {
+            for square in squares {
+                if square == &0 {
+                    game_is_continue = true;
+                    break 'board;
+                }
+            }
+        }
 
     // pub fn calculate_winner() {
+        game_is_continue
+    }
 
     // }
 }
