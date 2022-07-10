@@ -1,24 +1,21 @@
 use serde::{Deserialize};
+use std::{collections::HashMap, cmp::Ordering};
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct GameInfo {
     pub stone_position: [i32; 2],
     pub board: [[u32; 8]; 8],
     pub player: u32
 }
 
-// pub struct Board {
-    
-// }
-
 impl GameInfo {
     // 新規ボードの作成
     // pub fn new_board(self) -> [[u32; 8]; 8] {
 
     // }
-    // 石が配置可能となるポジションを返す
-    pub fn return_reversible_positions(&self) -> Vec<[i32; 2]> {
-        let moveable_coordinates: [[i32; 2]; 8] = [
+    // 反転可能なポジションを取得
+    pub fn get_reversible_positions(&self) -> Vec<[i32; 2]> {
+        let movable_coordinates: [[i32; 2]; 8] = [
             [0, 1],
             [0, -1],
             [1, 0],
@@ -33,14 +30,11 @@ impl GameInfo {
 
         let h = self.stone_position[0];
         let w = self.stone_position[1];
-        println!("{}", h);
-        println!("{}", w);
-        println!("/");
         if self.board[h as usize][w as usize] != 0 {
             return total_reversible_positions;
         }
 
-        for coordinate in moveable_coordinates {
+        for coordinate in movable_coordinates {
             let current_h = h;
             let current_w = w;
             let mut que = vec![[current_h, current_w]];
@@ -78,8 +72,6 @@ impl GameInfo {
             total_reversible_positions = [total_reversible_positions, reversible_positions].concat();
         }
 
-        dbg!(&total_reversible_positions);
-
         total_reversible_positions
     }
     // 石配置
@@ -97,11 +89,12 @@ impl GameInfo {
 
         board
     }
-    // 次のプレイヤーが石の配置可能か
-    pub fn next_player_is_reversible(&self, next_board: &[[u32; 8]; 8]) -> bool {
-        let next_player = if self.player == 1 {2} else {1};
+    // プレイヤーが石の配置可能か
+    // true: 置ける false: 置けない
+    pub fn calculate_player_is_reversible(&self) -> bool {
+        let next_player = self.player;
+        let next_board = self.board;
 
-        
         // next_boardの中で石が配置されていない座標の取得
         let mut positions_nothing_place = vec![];
         for (h, line) in next_board.iter().enumerate() {
@@ -112,44 +105,65 @@ impl GameInfo {
             }
         }
 
-        let mut next_player_is_reversible = false;
+        let mut player_is_reversible = false;
         for position in positions_nothing_place {
             let game_info = GameInfo {
                 stone_position: position,
-                board: *next_board,
+                board: next_board,
                 player: next_player,
             };
 
-            let revesible_positions = game_info.return_reversible_positions();
+            let revesible_positions = game_info.get_reversible_positions();
             if !revesible_positions.is_empty() {
-                next_player_is_reversible = true;
+                player_is_reversible = true;
                 break;
             }
         }
 
-        next_player_is_reversible
+        player_is_reversible
     }
-
-
+    // ヒント
     // pub fn tip() {
 
     // }
     // ボードの版面の状況を調べる。
     // true: ゲーム続行 false: ゲーム終了
-    pub fn calculate_board_status(board: &[[u32; 8]; 8]) -> bool {
-        let mut game_is_continue = false;
-        'board: for squares in board {
+    // pub fn calculate_board_status(board: &[[u32; 8]; 8]) -> bool {
+    //     let mut game_is_continue = false;
+    //     'boardloop: for squares in board {
+    //         for square in squares {
+    //             if square == &0 {
+    //                 game_is_continue = true;
+    //                 break 'boardloop;
+    //             }
+    //         }
+    //     }
+
+    //     game_is_continue
+    // }
+    // 勝者判定
+    pub fn calculate_winner(&self) -> String {
+        let board = self.board;
+        let mut stone_count: HashMap<&u32, i32> = HashMap::from([
+            (&1, 0),
+            (&2, 0)
+        ]);
+
+        for squares in board {
             for square in squares {
-                if square == &0 {
-                    game_is_continue = true;
-                    break 'board;
+                if square != 0 {
+                    *stone_count.get_mut(&square).unwrap() += 1;
                 }
             }
         }
 
-    // pub fn calculate_winner() {
-        game_is_continue
-    }
+        let black = stone_count.get(&1).unwrap();
+        let white = stone_count.get(&2).unwrap();
 
-    // }
+        match black.cmp(white) {
+            Ordering::Greater => "winner: black".to_string(),
+            Ordering::Less => "winner: white".to_string(),
+            Ordering::Equal => "draw".to_string()
+        }
+    }
 }
